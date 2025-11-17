@@ -16,12 +16,16 @@ struct  {
 //================================  eth_trace Context ================================\\
 
 int                 set_eth_getLogs_parameters (t_rpcResponse * response,struct  arguments *arg);
+
 struct EthcallNode* build_call_tree            (struct EthcallNode *root, t_rpcResponse * rpc_getlogs,struct  arguments *arg);
+
 void                print_call_tree            (struct EthcallNode * root);
+
 int                 get_bytecode               ( const char        * address
                                                 , const char       * blocknumber
                                                 , struct arguments * arg
                                                 , t_rpcResponse    * out_response);
+
 int                 get_StoregeAt              ( const char       *address
                                                 , const char       *index
                                                 , const char       *blocknumber
