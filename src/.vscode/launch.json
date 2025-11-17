@@ -1,0 +1,68 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "eth_blockNumber sepolia" ,
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/eth-explorer",
+            "args": ["-j", "https://ethereum-sepolia-rpc.publicnode.com", "--call", "eth_blockNumber", "-v"],
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": true,
+                "trace": true,
+                "traceResponse": true
+            }
+        },
+        {
+            "name": "eth_getTransactionByHash sepolia" ,
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/eth-explorer",
+            "args": ["-j", "https://ethereum-sepolia-rpc.publicnode.com", "-c", "eth_getTransactionByHash","-p","'[\"0x6c1b120f327b35e0e6592cfd767e2f43703f4838da3f0811a2c11e97d7867f30\"]'", "-v"],
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": true,
+                "trace": true,
+                "traceResponse": true
+            }
+        },
+        {
+            "name": "eth_simulate sepolia" ,
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/eth-explorer",
+            "args": ["-j", "https://ethereum-sepolia-rpc.publicnode.com", "-c", "eth_simulate","-p","'[\"0x6c1b120f327b35e0e6592cfd767e2f43703f4838da3f0811a2c11e97d7867f30\"]'", "-v"],
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": true,
+                "trace": true,
+                "traceResponse": true
+            }
+        },
+        {
+            "name": "eth_trace sepolia" ,
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/eth-explorer",
+            "args": ["-j", "https://ethereum-sepolia-rpc.publicnode.com", "-c", "eth_trace","-p","'[\"0x6c1b120f327b35e0e6592cfd767e2f43703f4838da3f0811a2c11e97d7867f30\"]'", "-v"],
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": true,
+                "trace": true,
+                "traceResponse": true
+            }
+        }
+    ]
+}

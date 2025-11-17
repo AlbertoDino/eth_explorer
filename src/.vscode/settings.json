@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "curl.h": "c",
+        "rpc_parser.h": "c",
+        "json.h": "c",
+        "compare": "c",
+        "limits": "c",
+        "new": "c",
+        "eth_simulate.h": "c",
+        "eth.h": "c",
+        "eth_trace.h": "c"
+    }
+}

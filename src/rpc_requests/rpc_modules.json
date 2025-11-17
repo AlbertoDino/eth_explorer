@@ -1,0 +1,6 @@
+{
+    "jsonrpc": "2.0",
+    "method": "rpc_modules",
+    "params": [],
+    "id": "1"
+}
