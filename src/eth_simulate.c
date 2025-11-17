@@ -8,14 +8,15 @@ json_object* execute_eth_simulate (struct arguments *arg)
 {
     int terminated             = 0;
     json_object   * result     = 0;
-    t_rpcResponse rpc_response = {0};
+    
 
     int use_latest_block = (strcmp(arg->module, "eth_simulate_latest") == 0);
 
     arg->module = "eth_getTransactionByHash";
 
     do {
-        terminated  = 1;
+        t_rpcResponse rpc_response = {0};
+        terminated                 = 1;
         if(make_rpc_call(arg->module, arg, &rpc_response) == 0)
         {
             if(rpc_response.type == RPC_SUCCESS)
@@ -40,7 +41,7 @@ json_object* execute_eth_simulate (struct arguments *arg)
                 fprintf(stderr, "code: %d, message: %s\n", rpc_response.data.error_info.code, rpc_response.data.error_info.message);
             }
         }        
-        //free_rpc_response(&rpc_response);
+        free_rpc_response(&rpc_response);
 
     } while (terminated==0);
     

@@ -1,15 +1,31 @@
 #include "eth_trace.h"
 
+#define EIP1967_IMPLEMENTATION_SLOT "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+#define EIP1967_ADMIN_SLOT          "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"
+#define EIP1967_BEACON_SLOT         "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50"
+
+
+
 /* -- eth_trace -- */
 
 
 int                 set_eth_getLogs_parameters (t_rpcResponse * response,struct  arguments *arg);
+
 struct EthcallNode* build_call_tree            (struct EthcallNode *root, t_rpcResponse * rpc_getlogs,struct  arguments *arg);
+
 void                print_call_tree            (struct EthcallNode * root);
+
 int                 get_bytecode               ( const char        * address
                                                 , const char       * blocknumber
                                                 , struct arguments * arg
                                                 , t_rpcResponse    * out_response);
+
+int                 get_StoregeAt              ( const char       *address
+                                                , const char       *index
+                                                , const char       *blocknumber
+                                                , struct arguments *arg 
+                                                , t_rpcResponse    *out_response);
+
 
 json_object* execute_eth_trace (struct arguments  * arg)
 {
@@ -97,7 +113,7 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
         json_object *log             = json_object_array_get_idx(rpc_getlogs->data.value, i);
         json_object *transactionHash = json_object_object_get(log, "transactionHash");
 
-        if(strcmp(root->transaction_hash,json_object_get_string(transactionHash))!=0)
+        if(strcmp(root->transaction_hash, json_object_get_string(transactionHash))!=0)
         {
             //this transaction is not part of our context
             continue;
@@ -120,17 +136,31 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
             }
         }
         
-        child->address_to = strdup (json_object_get_string(address));
+        child->address_to   = strdup (json_object_get_string(address));
 
         const char  *topic0 = json_object_get_string(json_object_array_get_idx(topics,0)); // topic0 is the complete event signature hash
-        child->call_type  = get_common_signature(topic0);
+        child->call_type    = get_common_signature(topic0);
 
-        child->selector   = malloc(sizeof(char)*11);
+        child->selector     = malloc(sizeof(char)*11);
         strncpy(child->selector, topic0, sizeof(char)*10);
         child->selector[10] = '\0';
 
         if(!child->call_type) {
             child->call_type = strdup ("Call");
+        }
+
+        // Check if the contract is a proxy
+       
+        char* slots_to_verify[] = { EIP1967_IMPLEMENTATION_SLOT, EIP1967_ADMIN_SLOT, EIP1967_BEACON_SLOT};
+        for (size_t i = 0; i < 3; i++)
+        {
+            t_rpcResponse rpc_getStorage = {0};
+            if(get_StoregeAt(child->address_to, slots_to_verify[i], "latest", arg, &rpc_getStorage)==0)
+            {
+                if(strcmp(json_object_get_string(rpc_getStorage.data.value),"0x0000000000000000000000000000000000000000000000000000000000000000")!=0)
+                    child->is_proxy = 1;
+            }
+            free_rpc_response(&rpc_getStorage);
         }
 
         struct EthcallNode *address_node = find_address_from_node(root, child->address_to);        
@@ -185,6 +215,31 @@ int get_bytecode( const char       * address
     return 0;
 }
 
+int get_StoregeAt ( const char       *address
+                  , const char       *index
+                  , const char       *blocknumber
+                  , struct arguments *arg 
+                  , t_rpcResponse    *out_response)
+{
+    arg->module = "eth_getStorageAt";
+
+    json_object * eth_new_params = json_object_new_array();
+    json_object_array_add(eth_new_params, json_object_new_string(address));
+    json_object_array_add(eth_new_params, json_object_new_string(index));
+    json_object_array_add(eth_new_params, json_object_new_string(blocknumber));
+
+    set_params(arg, json_object_to_json_string(eth_new_params));
+
+    json_object_put(eth_new_params);
+
+    if(make_rpc_call(arg->module, arg, out_response) != 0)
+    {
+        return -1;
+    }
+
+    return 0;
+}
+
 void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix, int deep, int is_last)
 {
     if(!node)
@@ -197,14 +252,20 @@ void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix
     fprintf(stdout,"%s"  , local_prefix);
     fprintf(stdout," %s " , node->address_to);
 
+    if(node->is_proxy)
+    {
+        fprintf(stdout,"🔄 PROXY ");        
+    }
+
     if(node->selector)
         fprintf(stdout,"[%s] ", node->selector);
-    
+        
     if(node->call_type)
         fprintf(stdout,"(%s) ", node->call_type);
 
     fprintf(stdout,"\n");
 
+    
     deep++;
     for (size_t i = 0; i < node->num_children; i++)
     {
@@ -240,6 +301,7 @@ void init_EthcallNode(struct EthcallNode* node)
     node->call_type       = 0;
     node->topic_signature = 0;
     node->selector        = 0;
+    node->is_proxy        = 0;
     node->children        = 0;
     node->num_children    = 0;
     node->data            = 0;

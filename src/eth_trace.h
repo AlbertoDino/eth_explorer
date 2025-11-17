@@ -3,6 +3,7 @@
 
 #include "eth.h"
 
+
 /* -- eth_trace -- */
 
 json_object* execute_eth_trace (struct arguments *arg);
@@ -19,6 +20,8 @@ struct EthcallNode {
     char * topic_signature; // I don't think I need indexed paramters or data (for now)
 
     char * selector;
+
+    int    is_proxy;
 
     char ** topics;
     size_t num_topics;

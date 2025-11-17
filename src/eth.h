@@ -68,6 +68,12 @@ struct rpc_program {
 int          make_rpc_call    (const char * module, struct arguments *arg, t_rpcResponse *response);
 json_object* build_rpc_payload (const char * module, struct arguments *arg);
 
+/// Converts a Hex string into a long long in decimal format
+long long    htoi   (const char * hex);
+
+/// Converts a long long decimal number into a hex string.
+/// make sure the char * has enough buffer for long character strings
+int          ltohex (long long value, char * strHex);
 
 /** --  Common EVM Signature Hashes  -- **/ 
 

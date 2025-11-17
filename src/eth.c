@@ -76,6 +76,25 @@ json_object* build_rpc_payload(const char * module, struct arguments *arg)
     return json_rpc_obj;
 }
 
+long long htol (const char * hex)
+{
+    char *hptr = 0;
+    errno = 0; 
+    long long num = strtoll(hex,&hptr,16);
+    if (errno != 0 || *hptr != '\0') 
+    {
+        fprintf(stderr, "Error: Invalid hex string for block number: %s\n", hex);
+        return 0;
+    }
+    return num;
+}
+
+int ltohex (long long value, char * strHex)
+{
+    snprintf(strHex,sizeof(strHex), "%#llx",value);
+    return 0;
+}
+
 int make_rpc_call(const char * module, struct arguments *arg, t_rpcResponse *response)
 {
     const char *headers[] = {
