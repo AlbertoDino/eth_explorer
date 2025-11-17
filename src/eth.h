@@ -21,8 +21,6 @@ struct arguments
     const char * module;
     const char * requestId;
     char       * params;
-
-    json_object * rpc_responses;
 };
 
 /* Networks */ 
@@ -40,11 +38,6 @@ void init_arguments(struct arguments *arguments);
 void free_arguments(struct arguments *arguments);
 
 void set_params(struct arguments  * arg,const char* params);
-
-void arg_add_rpc_response(struct arguments  * arg
-                            , const char* module
-                            , json_object * parameters
-                            , json_object * response);
 
 /** --  RPC Modules -- **/ 
 
@@ -69,7 +62,7 @@ int          make_rpc_call    (const char * module, struct arguments *arg, t_rpc
 json_object* build_rpc_payload (const char * module, struct arguments *arg);
 
 /// Converts a Hex string into a long long in decimal format
-long long    htoi   (const char * hex);
+long long    htol   (const char * hex);
 
 /// Converts a long long decimal number into a hex string.
 /// make sure the char * has enough buffer for long character strings

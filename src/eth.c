@@ -7,8 +7,6 @@ void init_arguments(struct arguments *arguments) {
     arguments->module        = 0;
     arguments->requestId     = "etherexplorer";
     arguments->params        = 0;
-    arguments->rpc_responses = json_object_new_object();
-    json_object_object_add(arguments->rpc_responses, "logs" ,json_object_new_array());
 }
 
 void free_arguments(struct arguments *arguments) {
@@ -20,8 +18,8 @@ void free_arguments(struct arguments *arguments) {
     if(arguments->params)
         free(arguments->params);
 
+    arguments->params = 0;
     //json_object_put(arguments->rpc_responses);
-    arguments->rpc_responses = 0;
 }    
 
 void set_params(struct arguments  * arg,const char* params)
@@ -29,24 +27,6 @@ void set_params(struct arguments  * arg,const char* params)
     if( arg->params)
         free(arg->params);
     arg->params = strdup(params);
-}
-
-void arg_add_rpc_response(struct arguments  * arg, const char* module, json_object * parameters, json_object * response)
-{
-    json_object * rpc_param_copy;
-    json_object * rpc_response_copy;
-
-    json_object_deep_copy(parameters , &rpc_param_copy   , 0);
-    json_object_deep_copy(response   , &rpc_response_copy, 0);
-
-    json_object * rpc_log = json_object_new_object();
-
-    json_object_object_add(rpc_log, "module"   , json_object_new_string(module));
-    json_object_object_add(rpc_log, "params"   , rpc_param_copy);
-    json_object_object_add(rpc_log, "response" , rpc_response_copy);
-
-    json_object * logs =  json_object_object_get(arg->rpc_responses,"logs");
-    json_object_array_add(logs, rpc_log);
 }
 
 json_object* build_rpc_payload(const char * module, struct arguments *arg)

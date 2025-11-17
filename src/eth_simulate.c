@@ -9,11 +9,9 @@ json_object* execute_eth_simulate (struct arguments *arg)
     int terminated             = 0;
     json_object   * result     = 0;
     
-
     int use_latest_block = (strcmp(arg->module, "eth_simulate_latest") == 0);
 
     arg->module = "eth_getTransactionByHash";
-
     do {
         t_rpcResponse rpc_response = {0};
         terminated                 = 1;
@@ -71,7 +69,6 @@ int set_eth_call_parameters(int use_latest_block, t_rpcResponse * rpc_response, 
     json_object_object_add(eth_param_obj, "input"   , input);
     json_object_object_add(eth_param_obj, "value"   , value);
 
-
     json_object_array_add(eth_call_params, eth_param_obj);
 
     if(use_latest_block)
@@ -93,10 +90,8 @@ int set_eth_call_parameters(int use_latest_block, t_rpcResponse * rpc_response, 
         }
 
         dec_blocknumber--;
-
         char hex_buffer[64];
         snprintf(hex_buffer,sizeof(hex_buffer), "%#llx",dec_blocknumber);
-
         json_object_array_add(eth_call_params, json_object_new_string(hex_buffer));
     }
 

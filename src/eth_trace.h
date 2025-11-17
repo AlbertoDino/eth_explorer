@@ -11,10 +11,12 @@ json_object* execute_eth_trace (struct arguments *arg);
 int ex_response_eth_trace (const json_object *paylaod_request, struct arguments *arg, struct t_rpcResponse *resp);
 
 struct EthcallNode {
-
+    
     char * transaction_hash;
     char * address_from;
     char * address_to;
+
+    long long gas_used;
 
     char * call_type;       // function called name derived from event ?
     char * topic_signature; // I don't think I need indexed paramters or data (for now)
@@ -22,6 +24,7 @@ struct EthcallNode {
     char * selector;
 
     int    is_proxy;
+    char * proxy_type;
 
     char ** topics;
     size_t num_topics;
