@@ -5,6 +5,7 @@
 
 /* -- eth_simulate -- */
 
+// entry point of eth_simulate program
 json_object* execute_eth_simulate (struct arguments *arg);
 
 #endif

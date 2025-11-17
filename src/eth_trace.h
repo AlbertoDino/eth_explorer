@@ -5,9 +5,8 @@
 
 /* -- eth_trace -- */
 
+// entry point of eth_trace program
 json_object* execute_eth_trace (struct arguments *arg);
-
-int ex_response_eth_trace (const json_object *paylaod_request, struct arguments *arg, struct t_rpcResponse *resp);
 
 struct EthcallNode {
     char * transaction_hash;
