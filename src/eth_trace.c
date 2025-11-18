@@ -380,7 +380,7 @@ struct EthcallNode* find_address_from_node(struct EthcallNode* node,const char* 
         {
            struct EthcallNode* found = find_address_from_node(node->children[i],address);
            if(found)
-              return found;
+              return node;
         }
     }
     return 0;
