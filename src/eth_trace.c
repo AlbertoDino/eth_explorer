@@ -4,6 +4,10 @@
 #define EIP1967_ADMIN_SLOT          "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103"
 #define EIP1967_BEACON_SLOT         "0xa3f0ad74e5423aebfd80d3ef4346578335a9a72aeaee59ff6cb3582b35133d50"
 
+#define CONTRACT_TYPE_PROXY          1
+#define CONTRACT_TYPE_IMPLEMENTATION 2
+
+
 struct  {
     char * slot;
     char * type;
@@ -161,10 +165,26 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
             t_rpcResponse rpc_getStorage = {0};
             if(get_StoregeAt(child->address_to, ProxySlots[i].slot, "latest", arg, &rpc_getStorage)==0)
             {
+                //0x0000000000000000000000002c72fe352878ab68bdcb7777c864b6fb45bc0ede
+                const char * slot_address = json_object_get_string(rpc_getStorage.data.value);
                 if(strcmp(json_object_get_string(rpc_getStorage.data.value),"0x0000000000000000000000000000000000000000000000000000000000000000")!=0)
                 {
-                    child->is_proxy   = 1;
+                    child->is_proxy   = CONTRACT_TYPE_PROXY;
                     child->proxy_type = strdup(ProxySlots[i].type);
+
+                    char address[64] = {0};
+                    address[0] = '0';
+                    address[1] = 'x';
+                    size_t len = strlen(slot_address);
+                    strncpy(&address[2],&slot_address[len-40], 40);
+
+                    struct EthcallNode *child_proxy_impl = alloc_node();
+                    child_proxy_impl->address_to = strdup(address);
+                    child_proxy_impl->is_proxy   = CONTRACT_TYPE_IMPLEMENTATION;
+                    child_proxy_impl->proxy_type = strdup("Implementation");
+
+                    add_child(child,child_proxy_impl);     
+
                 }
             }
             free_rpc_response(&rpc_getStorage);
@@ -228,9 +248,9 @@ void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix
     if(!node)
         return;
 
-    const char * local_prefix = is_last == 1 ? "└──" : "├──";
+    const char * local_prefix = is_last == 1 ? ( node->is_proxy != CONTRACT_TYPE_IMPLEMENTATION ? "└──" : "  ╰╾─" ) : "├──";
 
-    fprintf(stdout,"%*s" , (3*deep)," ");
+    //fprintf(stdout,"%*s" , (3*deep)," ");
     fprintf(stdout,"%s"  , parent_prefix);    
     fprintf(stdout,"%s"  , local_prefix);
     fprintf(stdout," %s " , node->address_to);
@@ -242,9 +262,17 @@ void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix
     }
     if(node->selector)
         fprintf(stdout,"[%s] ", node->selector);
-    if(node->is_proxy == 1)
+    if(node->is_proxy == CONTRACT_TYPE_PROXY)
     {
-        fprintf(stdout,"🔄 %s ",node->proxy_type);        
+        fprintf(stdout,"🔄");        
+    }
+    if(node->is_proxy == CONTRACT_TYPE_IMPLEMENTATION)
+    {
+        fprintf(stdout,"🔗");        
+    }
+    if(node->proxy_type != 0)
+    {
+        fprintf(stdout," %s ",node->proxy_type);        
     }
     if(node->call_type)
         fprintf(stdout,"(%s)", node->call_type);
@@ -255,7 +283,12 @@ void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix
     for (size_t i = 0; i < node->num_children; i++)
     {
         struct EthcallNode * child = node->children[i];
-        print_call_tree_child(child, is_last ? "   " : "│  " , deep, (i == node->num_children-1) ? 1 : 0 );        
+
+        // create prefix based on parent for correct alignment 
+        char parent_prefix_buffer[64] = {0};                     
+        sprintf(parent_prefix_buffer,"%*s%s%s", (3* (deep==1 ? 1 : 0)), "", parent_prefix , is_last ? "" : "│  ");
+
+        print_call_tree_child(child, parent_prefix_buffer, deep, (i == node->num_children-1) ? 1 : 0 );              
     }
 }
 
@@ -265,7 +298,7 @@ void print_call_tree (struct EthcallNode * root)
     fprintf(stdout," └── %s \n", root->address_from); 
     fprintf(stdout,"to: \n"); 
     int deep = 0;
-    print_call_tree_child(root, "", deep, 1);
+    print_call_tree_child(root, "   ", deep, 1);
     
 }
 

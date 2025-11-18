@@ -109,15 +109,12 @@ int main(int argc, char **argv)
 {    
     struct  arguments arguments;
     init_arguments(&arguments);
-
     argp_parse(&argp,argc,argv,0,0,&arguments);
-
     init_w_curl();
 
     if(arguments.action && strcmp(arguments.action,"call")==0)
     {
         exec_program exec_func = execute_standard_eth_rpc;
-
         size_t size = sizeof(rpc_modules) / sizeof(struct rpc_program);
         for(size_t i = 0; i < size; i++)
         {
@@ -125,7 +122,6 @@ int main(int argc, char **argv)
                 exec_func = rpc_modules[i].execute_rpc_program;
             }
         }
-
         json_object * result = exec_func(&arguments);
         if(result)
         {
@@ -133,7 +129,6 @@ int main(int argc, char **argv)
             fprintf(stdout, "%s\n", json_output);
         }
     }
-
     cleanup_w_curl();
     free_arguments(&arguments);
     return 0;
@@ -142,26 +137,20 @@ int main(int argc, char **argv)
 json_object* execute_standard_eth_rpc(struct arguments *arg)
 {
     json_object* result = 0;
-
     if(arg==0)
         return result;
-
     t_rpcResponse rpcResponse = {0};
-
     int call_res = make_rpc_call(arg->module, arg, &rpcResponse);
-
     if(call_res >= 0)
     {
         if(rpcResponse.type == RPC_SUCCESS)
         {
             result = rpcResponse.data.value;
         }
-
         if(rpcResponse.type == RPC_ERROR)
         {
             fprintf(stderr, "code: %d, message: %s\n", rpcResponse.data.error_info.code, rpcResponse.data.error_info.message);
         }
     }
-   
     return result;
 }
