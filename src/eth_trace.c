@@ -25,16 +25,18 @@ struct EthcallNode* build_call_tree            (struct EthcallNode *root, t_rpcR
 
 void                print_call_tree            (struct EthcallNode * root);
 
-int                 get_bytecode               ( const char        * address
+int                 get_bytecode               (const char        * address
                                                 , const char       * blocknumber
                                                 , struct arguments * arg
                                                 , t_rpcResponse    * out_response);
 
-int                 get_StoregeAt              ( const char       *address
+int                 get_StoregeAt              (const char       *address
                                                 , const char       *index
                                                 , const char       *blocknumber
                                                 , struct arguments *arg 
                                                 , t_rpcResponse    *out_response);
+// fastst for < 32 elements
+void                insertion_sort             (long long *buffer, size_t size);
 
 json_object* execute_eth_trace (struct arguments  * arg)
 {
@@ -60,18 +62,19 @@ json_object* execute_eth_trace (struct arguments  * arg)
         return 0;
     }
 
+    /* stage 3. eth_getLogs */
+    /*
     if(set_eth_getLogs_parameters(&rpc_txReceipt, arg)!=0)
     {
         return 0;
     }
 
-    /* stage 3. eth_getLogs */
     arg->module = "eth_getLogs";    
     if(make_rpc_call(arg->module, arg, &rpc_getlogs) != 0)
     {
         return 0;
     }
-
+    */
     /* build call tree from logs */
     struct EthcallNode *root = alloc_node();
 
@@ -85,7 +88,7 @@ json_object* execute_eth_trace (struct arguments  * arg)
     root->address_to          = strdup(json_object_get_string(address_to));
     root->gas_used            = htol(json_object_get_string(gas_used));
 
-    struct EthcallNode* all_logs_tree = build_call_tree(root, &rpc_getlogs, arg);
+    struct EthcallNode* all_logs_tree = build_call_tree(root, &rpc_txReceipt, arg);
     print_call_tree(root);
 
     // free res.
@@ -117,22 +120,29 @@ int set_eth_getLogs_parameters(t_rpcResponse * response,struct  arguments *arg)
 
 struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * rpc_getlogs,struct  arguments *arg)
 {
-    size_t logs_count = json_object_array_length(rpc_getlogs->data.value);
+    json_object *logs = json_object_object_get(rpc_getlogs->data.value, "logs");
+    size_t logs_count = json_object_array_length(logs);
+
+    long long *log_index_list = malloc(sizeof(long long)*logs_count);
+    size_t num_events         = 0;
+
+    struct EthcallNode *logslist = alloc_node();
 
     for(size_t i =0; i < logs_count; i++) {               
         
-        json_object *log             = json_object_array_get_idx(rpc_getlogs->data.value, i);
-        json_object *transactionHash = json_object_object_get(log, "transactionHash");
+        json_object *log    = json_object_array_get_idx (logs, i);
+        json_object *txHash = json_object_object_get    (log, "transactionHash");
 
-        if(strcmp(root->transaction_hash, json_object_get_string(transactionHash))!=0)
+        if(strcmp(root->transaction_hash, json_object_get_string(txHash))!=0)
         {
-            //this transaction is not part of our context
+            //this log is not part of our transaction
             continue;
         }
 
-        json_object *address         = json_object_object_get(log, "address");        
-        json_object *topics          = json_object_object_get(log, "topics");
-        size_t num_topics            = json_object_array_length(topics)-1;
+        json_object *address      = json_object_object_get(log, "address");        
+        json_object *topics       = json_object_object_get(log, "topics");
+        json_object *log_index    = json_object_object_get(log, "logIndex");
+        size_t num_topics         = json_object_array_length(topics)-1;
 
         struct EthcallNode *child = alloc_node(); 
         if(num_topics>0)
@@ -146,7 +156,8 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
             }
         }
         
-        child->address_to   = strdup (json_object_get_string(address));
+        child->log_index    = htol(json_object_get_string(log_index));
+        child->address_to   = strdup (json_object_get_string(address));        
         const char  *topic0 = json_object_get_string(json_object_array_get_idx(topics,0)); // topic0 is the complete event signature hash
         child->call_type    = get_common_signature(topic0);
         child->selector     = malloc(sizeof(char)*11);
@@ -165,7 +176,6 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
             t_rpcResponse rpc_getStorage = {0};
             if(get_StoregeAt(child->address_to, ProxySlots[i].slot, "latest", arg, &rpc_getStorage)==0)
             {
-                //0x0000000000000000000000002c72fe352878ab68bdcb7777c864b6fb45bc0ede
                 const char * slot_address = json_object_get_string(rpc_getStorage.data.value);
                 if(strcmp(json_object_get_string(rpc_getStorage.data.value),"0x0000000000000000000000000000000000000000000000000000000000000000")!=0)
                 {
@@ -190,12 +200,36 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
             free_rpc_response(&rpc_getStorage);
         }
 
+        /*
         struct EthcallNode *address_node = find_address_from_node(root, child->address_to);        
         struct EthcallNode *parent       = address_node != 0 ? address_node : root;
-        
-        add_child(parent,child);        
+        */
+        add_child(logslist, child);     
+
+        log_index_list[num_events] = child->log_index;
+        num_events++;   
     }
 
+    insertion_sort(log_index_list,num_events);
+
+    struct EthcallNode * prev_node_call = 0;
+    for (size_t i = 0; i < num_events; i++)
+    {
+        long long log_index            = log_index_list[i];
+        struct EthcallNode * node_call = find_node_from_logindex(logslist,log_index);
+        if (node_call == 0 )
+        {
+            fprintf(stderr,"Cannot find node call");
+            exit(1);
+        }
+
+        struct EthcallNode *address_node = find_node_from_address(root, node_call->address_to);        
+        struct EthcallNode *parent       = address_node != 0 ? address_node : root;
+
+        add_child(parent, node_call);     
+
+    }
+        
     return root;
 }
 
@@ -248,7 +282,7 @@ void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix
     if(!node)
         return;
 
-    const char * local_prefix = is_last == 1 ? ( node->is_proxy != CONTRACT_TYPE_IMPLEMENTATION ? "└──" : "  ╰╾─" ) : "├──";
+    const char * local_prefix = is_last == 1 ? ( node->is_proxy != CONTRACT_TYPE_IMPLEMENTATION ? "└──" : "  ╰╾─" ) :  ( node->is_proxy != CONTRACT_TYPE_IMPLEMENTATION ? "├──" : "┞╾─" );
 
     //fprintf(stdout,"%*s" , (3*deep)," ");
     fprintf(stdout,"%s"  , parent_prefix);    
@@ -260,20 +294,28 @@ void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix
         int gas_used = node->gas_used;
         fprintf(stdout,"| 🔋 Gas: %d " , gas_used);
     }
+
     if(node->selector)
         fprintf(stdout,"[%s] ", node->selector);
+
+    if(node->log_index!=0)
+        fprintf(stdout,"%lld ", node->log_index);
+
     if(node->is_proxy == CONTRACT_TYPE_PROXY)
     {
         fprintf(stdout,"🔄");        
     }
+
     if(node->is_proxy == CONTRACT_TYPE_IMPLEMENTATION)
     {
         fprintf(stdout,"🔗");        
     }
+
     if(node->proxy_type != 0)
     {
         fprintf(stdout," %s ",node->proxy_type);        
     }
+
     if(node->call_type)
         fprintf(stdout,"(%s)", node->call_type);
 
@@ -321,6 +363,7 @@ void init_EthcallNode(struct EthcallNode* node)
     node->topic_signature = 0;
     node->selector        = 0;
     node->is_proxy        = 0;
+    node->log_index       = 0;
     node->proxy_type      = 0;
     node->children        = 0;
     node->num_children    = 0;
@@ -366,10 +409,45 @@ void free_ethcallNode(struct EthcallNode* node)
     init_EthcallNode(node);
 }
 
-struct EthcallNode* find_address_from_node(struct EthcallNode* node,const char* address)
+struct EthcallNode* find_node_from_logindex(struct EthcallNode* node,long long logIndex)
+{
+     if(node==0)
+        return 0;
+
+    if(node->log_index == logIndex)
+        return node;
+    
+    if(node->num_children>0)
+    {
+        for (size_t i = 0; i < node->num_children; i++)
+        {
+           struct EthcallNode* found = find_node_from_logindex(node->children[i],logIndex);
+           if(found)
+              return found;
+        }
+    }
+    return 0;
+}
+
+struct EthcallNode* find_node_from_address(struct EthcallNode* node,const char* address)
 {
     if(node==0)
         return 0;
+
+    for (size_t i = 0; i < node->num_topics; i++)
+    {
+        size_t topic_len = strlen(node->topics[i]);
+        if(topic_len>40)
+        {
+            char buffer[64] = {0};
+            strncpy(&buffer[0],&(node->topics[i][topic_len-40]),40);
+            buffer[40] = '\0';            
+            if(strcmp(buffer,&address[2]) == 0)
+                return node;
+        }
+    }
+    
+
     if (strcmp(node->address_to, address) == 0) 
     {
         return node;
@@ -378,9 +456,9 @@ struct EthcallNode* find_address_from_node(struct EthcallNode* node,const char* 
     {
         for (size_t i = 0; i < node->num_children; i++)
         {
-           struct EthcallNode* found = find_address_from_node(node->children[i],address);
+           struct EthcallNode* found = find_node_from_address(node->children[i],address);
            if(found)
-              return node;
+              return found;
         }
     }
     return 0;
@@ -393,4 +471,17 @@ void add_child(struct EthcallNode* parent,struct EthcallNode* child)
     parent->num_children ++;
 }
 
- 
+ void insertion_sort(long long *buffer, size_t size)
+ {
+    for (size_t i = 0; i < size; i++)
+    {
+        long long val = buffer[i];
+        int j = i - 1;
+
+        while (j >=0 && buffer[j] > val) {
+            buffer[j +1] = buffer[j];
+            j --;
+        }
+        buffer[j + 1 ] = val;
+    }    
+ }

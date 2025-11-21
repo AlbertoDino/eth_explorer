@@ -8,6 +8,7 @@
         "new": "c",
         "eth_simulate.h": "c",
         "eth.h": "c",
-        "eth_trace.h": "c"
+        "eth_trace.h": "c",
+        "cmath": "c"
     }
 }

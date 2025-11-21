@@ -17,6 +17,7 @@ struct EthcallNode {
     char * topic_signature; // I don't think I need indexed paramters or data (for now)
     char * selector;
     int    is_proxy;
+    long long log_index;
     char * proxy_type;
     char ** topics;
     size_t num_topics;
@@ -31,7 +32,9 @@ void init_EthcallNode(struct EthcallNode* node);
 
 void free_ethcallNode(struct EthcallNode* node);
 
-struct EthcallNode* find_address_from_node(struct EthcallNode* node,const char* address);
+struct EthcallNode* find_node_from_logindex(struct EthcallNode* node,long long logIndex);
+
+struct EthcallNode* find_node_from_address(struct EthcallNode* node,const char* address);
 
 void add_child(struct EthcallNode* parent,struct EthcallNode* child);
 
