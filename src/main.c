@@ -145,7 +145,7 @@ json_object* execute_standard_eth_rpc(struct arguments *arg)
     {
         if(rpcResponse.type == RPC_SUCCESS)
         {
-            result = rpcResponse.data.value;
+            result = json_tokener_parse(rpcResponse.data.value);
         }
         if(rpcResponse.type == RPC_ERROR)
         {

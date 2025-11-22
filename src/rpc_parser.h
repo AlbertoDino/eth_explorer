@@ -7,7 +7,7 @@ struct t_rpcResponse {
     char* id;
     enum { RPC_SUCCESS, RPC_ERROR } type;
     union {
-        json_object *value; // allocate dynamically 
+        char *value; // allocate dynamically 
 
         struct {
             int code;

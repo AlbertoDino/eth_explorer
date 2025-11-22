@@ -21,7 +21,7 @@ json_object* execute_eth_simulate (struct arguments *arg)
             {
                 if(strcmp(arg->module, "eth_call") == 0)
                 {
-                    result = rpc_response.data.value;
+                    result = json_tokener_parse(rpc_response.data.value);
                 }  
 
                 if(strcmp(arg->module, "eth_getTransactionByHash") == 0)
@@ -48,7 +48,9 @@ json_object* execute_eth_simulate (struct arguments *arg)
 
 int set_eth_call_parameters(int use_latest_block, t_rpcResponse * rpc_response, struct arguments *arg)
 {
-    // ** Stage 1 eth_getTransactionByHash ** 
+    json_object *response_object = json_tokener_parse(rpc_response->data.value);
+    
+    // ** Stage 1 eth_getTransactionByHash **     
     json_object *eth_call_params = json_object_new_array_ext(2); 
     json_object *eth_param_obj   = json_object_new_object();
 
@@ -58,11 +60,11 @@ int set_eth_call_parameters(int use_latest_block, t_rpcResponse * rpc_response, 
     json_object *input       = NULL;
     json_object *value       = NULL;
 
-    json_object_object_get_ex(rpc_response->data.value ,"from"        , &from);
-    json_object_object_get_ex(rpc_response->data.value ,"to"          , &to);
-    json_object_object_get_ex(rpc_response->data.value ,"blockNumber" , &blocknumber);
-    json_object_object_get_ex(rpc_response->data.value ,"input"       , &input);
-    json_object_object_get_ex(rpc_response->data.value ,"value"       , &value);
+    json_object_object_get_ex(response_object ,"from"        , &from);
+    json_object_object_get_ex(response_object ,"to"          , &to);
+    json_object_object_get_ex(response_object ,"blockNumber" , &blocknumber);
+    json_object_object_get_ex(response_object ,"input"       , &input);
+    json_object_object_get_ex(response_object ,"value"       , &value);
 
     json_object_object_add(eth_param_obj, "to"      , to);
     json_object_object_add(eth_param_obj, "from"    , from);
@@ -97,6 +99,7 @@ int set_eth_call_parameters(int use_latest_block, t_rpcResponse * rpc_response, 
 
     set_params(arg, json_object_to_json_string(eth_call_params));
     json_object_put(eth_call_params);
+    json_object_put(response_object);
 
     return 0;
 }

@@ -21,7 +21,7 @@ struct  {
 
 int                 set_eth_getLogs_parameters (t_rpcResponse * response,struct  arguments *arg);
 
-struct EthcallNode* build_call_tree            (struct EthcallNode *root, t_rpcResponse * rpc_getlogs,struct  arguments *arg);
+struct EthcallNode* build_call_tree            (struct EthcallNode *root, json_object * rpc_result,struct  arguments *arg);
 
 void                print_call_tree            (struct EthcallNode * root);
 
@@ -39,14 +39,15 @@ int                 get_StoregeAt              (const char       *address
 void                insertion_sort             (long long *buffer, size_t size);
 
 json_object* execute_eth_trace (struct arguments  * arg)
-{
-    int terminated           = 0;
-    json_object   *result    = 0;
-    
+{  
     t_rpcResponse rpc_txByHash  = {0};
     t_rpcResponse rpc_txReceipt = {0};
     t_rpcResponse rpc_getlogs   = {0};
 
+    json_object   *txReceipt_result = 0;
+
+
+    
     /* stage 1. eth_getTransactionByHash */
     arg->module = "eth_getTransactionByHash";
         
@@ -75,34 +76,39 @@ json_object* execute_eth_trace (struct arguments  * arg)
         return 0;
     }
     */
-    /* build call tree from logs */
-    struct EthcallNode *root = alloc_node();
 
-    json_object *address_from = json_object_object_get(rpc_txReceipt.data.value , "from");
-    json_object *address_to   = json_object_object_get(rpc_txReceipt.data.value , "to");
-    json_object *tx_hash      = json_object_object_get(rpc_txReceipt.data.value , "transactionHash");
-    json_object *gas_used     = json_object_object_get(rpc_txReceipt.data.value , "gasUsed");
+    /* build call tree from logs */
+    struct EthcallNode *root  = alloc_node();
+
+    txReceipt_result          = json_tokener_parse(rpc_txReceipt.data.value);
+
+    json_object *address_from = json_object_object_get(txReceipt_result , "from");
+    json_object *address_to   = json_object_object_get(txReceipt_result , "to");
+    json_object *tx_hash      = json_object_object_get(txReceipt_result , "transactionHash");
+    json_object *gas_used     = json_object_object_get(txReceipt_result , "gasUsed");
 
     root->transaction_hash    = strdup(json_object_get_string(tx_hash));
     root->address_from        = strdup(json_object_get_string(address_from));
     root->address_to          = strdup(json_object_get_string(address_to));
     root->gas_used            = htol(json_object_get_string(gas_used));
 
-    struct EthcallNode* all_logs_tree = build_call_tree(root, &rpc_txReceipt, arg);
+    struct EthcallNode* all_logs_tree = build_call_tree(root, txReceipt_result, arg);
     print_call_tree(root);
 
     // free res.
+    json_object_put(txReceipt_result);
     free_rpc_response(&rpc_txByHash);
     free_rpc_response(&rpc_txReceipt);
     free_rpc_response(&rpc_getlogs);
     free_ethcallNode(root);
 
-    return result;
+    return 0;
 }
 
 int set_eth_getLogs_parameters(t_rpcResponse * response,struct  arguments *arg)
-{
-    json_object * rpc_response_blockHash = json_object_object_get(response->data.value , "blockHash");            
+{    
+    json_object * rpc_response           = json_tokener_parse(response->data.value);
+    json_object * rpc_response_blockHash = json_object_object_get(rpc_response, "blockHash");            
     const char  * hash                   = json_object_get_string(rpc_response_blockHash);
 
     json_object * eth_new_params = json_object_new_array();
@@ -114,13 +120,13 @@ int set_eth_getLogs_parameters(t_rpcResponse * response,struct  arguments *arg)
     set_params(arg, json_object_to_json_string(eth_new_params));
 
     json_object_put(eth_new_params);
-
+    json_object_put(rpc_response);
     return 0;
 }
 
-struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * rpc_getlogs,struct  arguments *arg)
+struct EthcallNode * build_call_tree(struct EthcallNode *root, json_object * rpc_result,struct  arguments *arg)
 {
-    json_object *logs = json_object_object_get(rpc_getlogs->data.value, "logs");
+    json_object *logs = json_object_object_get(rpc_result, "logs");
     size_t logs_count = json_object_array_length(logs);
 
     long long *log_index_list = malloc(sizeof(long long)*logs_count);
@@ -176,8 +182,9 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
             t_rpcResponse rpc_getStorage = {0};
             if(get_StoregeAt(child->address_to, ProxySlots[i].slot, "latest", arg, &rpc_getStorage)==0)
             {
-                const char * slot_address = json_object_get_string(rpc_getStorage.data.value);
-                if(strcmp(json_object_get_string(rpc_getStorage.data.value),"0x0000000000000000000000000000000000000000000000000000000000000000")!=0)
+                json_object * response_getStorage = json_tokener_parse(rpc_getStorage.data.value);
+                const char * slot_address         = json_object_get_string(response_getStorage);
+                if(strcmp(json_object_get_string(response_getStorage),"0x0000000000000000000000000000000000000000000000000000000000000000")!=0)
                 {
                     child->is_proxy   = CONTRACT_TYPE_PROXY;
                     child->proxy_type = strdup(ProxySlots[i].type);
@@ -196,14 +203,11 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, t_rpcResponse * r
                     add_child(child,child_proxy_impl);     
 
                 }
+                json_object_put(response_getStorage);
             }
             free_rpc_response(&rpc_getStorage);
         }
 
-        /*
-        struct EthcallNode *address_node = find_address_from_node(root, child->address_to);        
-        struct EthcallNode *parent       = address_node != 0 ? address_node : root;
-        */
         add_child(logslist, child);     
 
         log_index_list[num_events] = child->log_index;

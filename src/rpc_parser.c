@@ -17,7 +17,7 @@ void free_rpc_response(t_rpcResponse* response)
     case RPC_SUCCESS:
         if(response->data.value) 
         {
-            //json_object_put(response->data.value);
+            free(response->data.value);
             response->data.value = 0;
         }
         break;
@@ -87,12 +87,7 @@ int parse_json_rpc_response(const char *jstring, t_rpcResponse *response, int ve
 
     if(has_result && !has_error) {
         response->type       = RPC_SUCCESS;
-        if(json_object_deep_copy(jResult, &response->data.value, 0)<0)
-        {
-            if(verbose)
-                printf("RpcParser> JSON-RPC error copying result json object.\n");
-            goto cleanup;
-        }
+        response->data.value = strdup(json_object_to_json_string(jResult));
     }
     else if(!has_result && has_error) {
         response->type                    = RPC_ERROR;

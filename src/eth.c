@@ -19,7 +19,6 @@ void free_arguments(struct arguments *arguments) {
         free(arguments->params);
 
     arguments->params = 0;
-    //json_object_put(arguments->rpc_responses);
 }    
 
 void set_params(struct arguments  * arg,const char* params)
