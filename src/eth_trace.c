@@ -369,12 +369,13 @@ void print_call_tree_child (struct EthcallNode * node,const char * parent_prefix
 
 void print_call_tree (struct EthcallNode * root)
 {
-    fprintf(stdout,"timestamp: %s \n", root->time_stamp); 
     fprintf(stdout,"\n"); 
     fprintf(stdout,"transaction: %s \n", root->transaction_hash); 
     fprintf(stdout," ├── parent block hash:  %s \n", root->parent_block_hash); 
     fprintf(stdout," ╰╾─ 🔨 miner: %s \n", root->miner); 
     fprintf(stdout,"\n"); 
+    fprintf(stdout,"timestamp: %s \n", root->time_stamp); 
+    fprintf(stdout,"\n");
     fprintf(stdout,"from address: \n"); 
     fprintf(stdout," └── %s \n", root->address_from); 
     fprintf(stdout,"to address: \n"); 
