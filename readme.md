@@ -66,10 +66,16 @@ The standout feature of ETH-Explorer. Given any transaction hash, `eth_trace` re
 ### Example Output
 
 ```
-from: 
+timestamp: 2025-11-18 13:09:24 
+
+transaction: 0xf81826d3da8c356116dc9e138cb42cc3da7e364888ce46af8cadc1cda564da30 
+ ├── parent block hash:  0x2b4a19cef827e42a6e9bbb3663ac5b662c61467e367cd9b604dad60dc8f4aee7 
+ ╰╾─ 🔨 miner: 0x5cc0dde14e7256340cc820415a6022a7d1c93a35 
+
+from address: 
  └── 0x12e60f3971a3cb26b1a65388d0b0ab2e4eadf5a1 
-to: 
-   └── 0xe7db6d870747d152f8442e7cc7598d480935c7db | 🔋Gas: 852062 | BlockNumber 0x93540f 
+to address: 
+   └── 0xe7db6d870747d152f8442e7cc7598d480935c7db | 🔋Gas: 852062 | BlockNumber: 0x93540f 
       ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x1cf3b03a] 129 🔄 Beacon Proxy (Call, args: 1)
       │  ┞╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🛠️  Implementation 
       │  └── 0x4b793496f1ce172f5b46b032b801fd07695607df [0xf3855dc2] 130 🔄 Beacon Proxy (Call, args: 3)

@@ -225,8 +225,7 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, json_object * rpc
                     child_proxy_impl->is_proxy   = CONTRACT_TYPE_IMPLEMENTATION;
                     child_proxy_impl->proxy_type = strdup("Implementation");
 
-                    add_child(child,child_proxy_impl);     
-
+                    add_child(child,child_proxy_impl);
                 }
                 json_object_put(response_getStorage);
             }
@@ -251,7 +250,6 @@ struct EthcallNode * build_call_tree(struct EthcallNode *root, json_object * rpc
             fprintf(stderr,"Cannot find node call");
             exit(1);
         }
-
 
         struct EthcallNode *address_node = find_node_from_address(root, node_call->address_to);        
         struct EthcallNode *parent       = address_node!= 0 && address_node == prev_node_call ? address_node : root;
@@ -382,7 +380,6 @@ void print_call_tree (struct EthcallNode * root)
     fprintf(stdout,"to address: \n"); 
     int deep = 0;
     print_call_tree_child(root, "   ", deep, 1);
-    
 }
 
 //================================  Ethcall node funcs ================================\\

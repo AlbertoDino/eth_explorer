@@ -99,10 +99,8 @@ int make_rpc_call(const char * module, struct arguments *arg, t_rpcResponse *res
     }
 
     const char *json_payload = json_object_to_json_string(json_rpc_obj);
-
     t_response http_response = w_curl_http_post(arg->json_rpc_url, json_payload, headers, 2, arg->verbose);
-
-    int parseResult = parse_json_rpc_response(http_response.memory, response, arg->verbose);
+    int parseResult          = parse_json_rpc_response(http_response.memory, response, arg->verbose);
 
     if(response->type == RPC_SUCCESS && response->data.value != 0 && strcmp(response->data.value,"null")==0) 
     {
