@@ -374,13 +374,14 @@ void print_call_tree (struct EthcallNode * root)
     fprintf(stdout," ├── parent block hash:  %s \n", root->parent_block_hash); 
     fprintf(stdout," ╰╾─ 🔨 miner: %s \n", root->miner); 
     fprintf(stdout,"\n"); 
-    fprintf(stdout,"timestamp: %s \n", root->time_stamp); 
-    fprintf(stdout,"\n");
+   
     fprintf(stdout,"from address: \n"); 
     fprintf(stdout," └── %s \n", root->address_from); 
     fprintf(stdout,"to address: \n"); 
     int deep = 0;
     print_call_tree_child(root, "   ", deep, 1);
+    fprintf(stdout,"\n");
+    fprintf(stdout,"timestamp: %s \n", root->time_stamp); 
 }
 
 //================================  Ethcall node funcs ================================\\
