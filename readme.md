@@ -1,6 +1,6 @@
 # ETH-Explorer
 
-A lightweight CLI utility for making RPC calls to Ethereum networks, featuring powerful transaction tracing with smart contract identification.
+A simple CLI utility for making RPC calls to Ethereum networks, featuring powerful transaction tracing with smart contract identification.
 
 ## Highlights
 
@@ -69,45 +69,34 @@ The standout feature of ETH-Explorer. Given any transaction hash, `eth_trace` re
 from: 
  └── 0x12e60f3971a3cb26b1a65388d0b0ab2e4eadf5a1 
 to: 
-   └── 0xe7db6d870747d152f8442e7cc7598d480935c7db | 🔋 Gas: 852062 
-      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x1cf3b03a] 129 🔄 Beacon Proxy (Call)
-      │  ┞╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      │  ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0xf3855dc2] 130 🔄 Beacon Proxy (Call)
-      │  │  ┞╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      │  │  └── 0xf5266c485947a3ac4f6bdecd984e96997aab4e65 [0x996612e7] 143 🔄 Beacon Proxy (Call)
-      │  │    ╰╾─ 0x9e2534786c1bed03719abe64658a0842bcbc866c 🔗 Implementation 
-      │  ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 137 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │    ╰╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      │  ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 138 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │    ╰╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      │  ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 139 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │    ╰╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      │  ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 140 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │    ╰╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      │  ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 141 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │    ╰╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      │  └── 0x4b793496f1ce172f5b46b032b801fd07695607df [0xc7f505b2] 142 🔄 Beacon Proxy (Call)
-      │    ╰╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🔗 Implementation 
-      ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x1cf3b03a] 131 🔄 Beacon Proxy (Call)
-      │  ┞╾─ 0x8e2b843a221c155cf390ed854c9d75639c70a989 🔗 Implementation 
-      │  ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x2f878811] 132 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │  ┞╾─ 0x8e2b843a221c155cf390ed854c9d75639c70a989 🔗 Implementation 
-      │  │  └── 0x30d0c863da6e11884a304ded10b3550332b8f29a [0x41d21945] 136 🔄 Proxy (Call)
-      │  │    ╰╾─ 0x521433f18d35276ecd0681142389f19dfe4c9978 🔗 Implementation 
-      │  ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x2f878811] 133 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │    ╰╾─ 0x8e2b843a221c155cf390ed854c9d75639c70a989 🔗 Implementation 
-      │  ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x2f878811] 134 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
-      │  │    ╰╾─ 0x8e2b843a221c155cf390ed854c9d75639c70a989 🔗 Implementation 
-      │  └── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0xc7f505b2] 135 🔄 Beacon Proxy (Call)
-      │    ╰╾─ 0x8e2b843a221c155cf390ed854c9d75639c70a989 🔗 Implementation 
-      └── 0xe7db6d870747d152f8442e7cc7598d480935c7db [0x842fb24a] 144 (Call)
+   └── 0xe7db6d870747d152f8442e7cc7598d480935c7db | 🔋Gas: 852062 | BlockNumber 0x93540f 
+      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x1cf3b03a] 129 🔄 Beacon Proxy (Call, args: 1)
+      │  ┞╾─ 0x9352c3b99ccec38116a9a393a01a1ac5e9a1a533 🛠️  Implementation 
+      │  └── 0x4b793496f1ce172f5b46b032b801fd07695607df [0xf3855dc2] 130 🔄 Beacon Proxy (Call, args: 3)
+      ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x1cf3b03a] 131 🔄 Beacon Proxy (Call, args: 1)
+      │  ┞╾─ 0x8e2b843a221c155cf390ed854c9d75639c70a989 🛠️  Implementation 
+      │  └── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x2f878811] 132 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x2f878811] 133 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0x2f878811] 134 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0xb266bd388eb45be9c3fab21c68bf0713dc9d7e84 [0xc7f505b2] 135 🔄 Beacon Proxy (Call, args: 0)
+      ├── 0x30d0c863da6e11884a304ded10b3550332b8f29a [0x41d21945] 136 🔄 Proxy (Call, args: 0)
+      │    ╰╾─ 0x521433f18d35276ecd0681142389f19dfe4c9978 🛠️  Implementation 
+      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 137 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 138 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 139 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 140 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0x2f878811] 141 🔄 Beacon Proxy (RoleAdded(bytes32,address,address))
+      ├── 0x4b793496f1ce172f5b46b032b801fd07695607df [0xc7f505b2] 142 🔄 Beacon Proxy (Call, args: 0)
+      ├── 0xf5266c485947a3ac4f6bdecd984e96997aab4e65 [0x996612e7] 143 🔄 Beacon Proxy (Call, args: 0)
+      │    ╰╾─ 0x9e2534786c1bed03719abe64658a0842bcbc866c 🛠️  Implementation 
+      └── 0xe7db6d870747d152f8442e7cc7598d480935c7db [0x842fb24a] 144 (Call, args: 1)
 ```
 
 **Legend:**
 | Symbol | Meaning |
 |--------|---------|
 | 🔄 | Proxy contract detected |
-| 🔗 | Resolved implementation address |
+| 🛠️ | Resolved implementation address |
 | 🔋 | Gas consumed |
 | `[0x...]` | Function selector (4-byte signature) |
 | `123` | LogIndex event |
@@ -116,6 +105,7 @@ to:
 
 | Option | Description |
 |--------|-------------|
+| `--builtin-modules` | Shows a list of built-in programs |
 | `-j` | JSON-RPC endpoint URL |
 | `-c` | RPC method or built-in command to execute |
 | `-p` | Parameters as a JSON array |

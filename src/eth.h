@@ -7,7 +7,7 @@
 #include <string.h>
 #include <argp.h>
 #include <json-c/json.h>
-
+#include <time.h>
 
 /** -- Type Definition -- **/
 
@@ -67,6 +67,8 @@ long long    htol   (const char * hex);
 /// Converts a long long decimal number into a hex string.
 /// make sure the char * has enough buffer for long character strings
 int          ltohex (long long value, char * strHex);
+
+char *       unixtodt(time_t unix_timestamp);
 
 /** --  Common EVM Signature Hashes  -- **/ 
 

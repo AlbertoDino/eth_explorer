@@ -74,6 +74,15 @@ int ltohex (long long value, char * strHex)
     return 0;
 }
 
+char * unixtodt(time_t unix_timestamp)
+{
+    struct tm *timeinfo;
+    timeinfo = localtime(&unix_timestamp);
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
+    return strdup(buffer);
+}
+
 int make_rpc_call(const char * module, struct arguments *arg, t_rpcResponse *response)
 {
     const char *headers[] = {
@@ -94,6 +103,12 @@ int make_rpc_call(const char * module, struct arguments *arg, t_rpcResponse *res
     t_response http_response = w_curl_http_post(arg->json_rpc_url, json_payload, headers, 2, arg->verbose);
 
     int parseResult = parse_json_rpc_response(http_response.memory, response, arg->verbose);
+
+    if(response->type == RPC_SUCCESS && response->data.value != 0 && strcmp(response->data.value,"null")==0) 
+    {
+        fprintf(stderr,"rpc [%s] returned Empty response.\n",module );
+        parseResult = -1;
+    }
 
     json_object_put(json_rpc_obj);
     free_t_response(&http_response);

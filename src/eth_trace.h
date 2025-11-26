@@ -3,26 +3,32 @@
 
 #include "eth.h"
 
+#define EMPTY_ADDRESS "0x0000000000000000000000000000000000000000000000000000000000000000"
+
 /* -- eth_trace -- */
 
 // entry point of eth_trace program
 json_object* execute_eth_trace (struct arguments *arg);
 
 struct EthcallNode {
-    char * transaction_hash;
-    char * address_from;
-    char * address_to;
+    char *    time_stamp;
+    char *    miner;
+    char *    parent_block_hash;
+    char *    transaction_hash;
+    char *    address_from;
+    char *    address_to;
+    char *    block_number;
     long long gas_used;
-    char * call_type;       // function called name derived from event ?
-    char * topic_signature; // I don't think I need indexed paramters or data (for now)
-    char * selector;
-    int    is_proxy;
+    char *    call_type;       
+    char *    topic_signature;
+    char *    selector;
+    int       is_proxy;
     long long log_index;
-    char * proxy_type;
-    char ** topics;
-    size_t num_topics;
+    char *    proxy_type;
+    char **   topics;
+    size_t    num_topics;    
+    size_t    num_children;
     struct EthcallNode ** children;
-    size_t num_children;
     json_object* data;
 };
 
