@@ -31,6 +31,7 @@ struct rpc_program rpc_modules[] = {
 #define PARAMETER_KEY 'p'
 #define REQUESTID_KEY 'i'
 #define VERBOSE_KEY   'v'
+#define NETWORK_KEY   'n'
 
 /* Arguments */
         
@@ -42,12 +43,13 @@ struct argp_option options[] ={
     4th  @ - option flags 0=mandatory , OPTION_ARG_OPTIONAL * if long options required a = between the option and the argumnt
     5th  @ - description to show in the --help
     */
-    {"builtin-modules"  , MODULESS_KEY  , 0           , 0                    , "Gets the list of modules embedded in the program" },
-    {"jsonrpc"          , JSONRPC_KEY   , "URL"       , 0                    , "Specify Json Rpc url" },
-    {"call"             , CALL_KEY      , "MODULENAME", 0                    , "Call a specific module via RPC" },
-    {"parameters"       , PARAMETER_KEY , "PARAMS"    , 0                    , "Module's arguments in JSON format, default is empty []. In Unix bash remember to quote the argument." },
-    {"requestId"        , REQUESTID_KEY , "ID"        , OPTION_ARG_OPTIONAL  , "Request Id, default is 'eth-explorer'" },
-    {0                  , VERBOSE_KEY   , 0           , OPTION_ARG_OPTIONAL  , "enable verbose logging" },
+    {"builtin-modules"  , MODULESS_KEY  , 0             , 0                    , "Gets the list of modules embedded in the program" },
+    {"network"          , NETWORK_KEY   , "NETWORKNAME" , 0                    , "Specify the network by a envrioment name. The name have as `export <network_name>=<json-rpc-url>`." },
+    {"jsonrpc"          , JSONRPC_KEY   , "URL"         , 0                    , "Specify Json Rpc url" },
+    {"call"             , CALL_KEY      , "MODULENAME"  , 0                    , "Call a specific module via RPC" },
+    {"parameters"       , PARAMETER_KEY , "PARAMS"      , 0                    , "Module's arguments in JSON format, default is empty []. In Unix bash remember to quote the argument." },
+    {"requestId"        , REQUESTID_KEY , "ID"          , OPTION_ARG_OPTIONAL  , "Request Id, default is 'eth-explorer'" },
+    {0                  , VERBOSE_KEY   , 0             , OPTION_ARG_OPTIONAL  , "enable verbose logging" },
     {0}
 };
 
@@ -69,6 +71,15 @@ error_t parse_opt(int key,char *arg, struct argp_state *state) {
 
     case JSONRPC_KEY:
         arguments->json_rpc_url = arg;
+        break;
+    case NETWORK_KEY:
+        arguments->json_rpc_url = getenv(arg);
+        if(arguments->json_rpc_url==0)
+        {
+            fprintf(stderr,"Enviroment variable %s not found.\n",arg);
+            fprintf(stderr,"Set it with: export %s=<rpc_url>\n.",arg);
+            exit(1);
+        }
         break;
     case CALL_KEY:
         arguments->action = "call";

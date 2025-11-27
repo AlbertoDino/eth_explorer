@@ -93,6 +93,21 @@
                 "trace": true,
                 "traceResponse": true
             }
+        },
+        {
+            "name": "eth_trace sepolia by network" ,
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/eth-explorer",
+            "args": ["-n", "SEPOLIA", "-c", "eth_trace","-p","'[\"0xf81826d3da8c356116dc9e138cb42cc3da7e364888ce46af8cadc1cda564da30\"]'", "-v"],
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "logging": {
+                "engineLogging": true,
+                "trace": true,
+                "traceResponse": true
+            }
         }
     ]
 }
