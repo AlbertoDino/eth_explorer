@@ -371,11 +371,11 @@ void print_call_tree (struct EthcallNode * root)
 {
     fprintf(stdout,"\n"); 
     fprintf(stdout,"transaction: %s \n", root->transaction_hash); 
-    fprintf(stdout," ├── parent block hash:  %s \n", root->parent_block_hash); 
+    fprintf(stdout," ├── parent block:  %s \n", root->parent_block_hash); 
     fprintf(stdout," ╰╾─ 🔨 miner: %s \n", root->miner); 
     fprintf(stdout,"\n"); 
    
-    fprintf(stdout,"from address: \n"); 
+    fprintf(stdout,"from address (originator): \n"); 
     fprintf(stdout," └── %s \n", root->address_from); 
     fprintf(stdout,"to address: \n"); 
     int deep = 0;
